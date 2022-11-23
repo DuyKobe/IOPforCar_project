@@ -1,29 +1,3 @@
-// Libraries
-/*OBDII-UART-Serial version 9
-* This program will talk to vehicle using the OBDII-UART board, 
-*and upload to freeboard IoT platform
-* 
-* 
-* updates:
-*   v3: modified the getResponse() function so that the buffer receives the correct response.
-*       add the getRPM() to get the engine RPM from the vehicle.
-*   v4: add the getSpeed() function to get the speed of the vehicle
-*   v5: is the wifi version
-*   v6: is the non-wifi, non-serial version. Remove serial initialization,
-*       so that the board can work without a computer.
-*   v7: is the non-wifi, non-serial version. Add fuel level and coolant temperature.
-*       rearrange the display location.
-*   v8: is the wifi, non-serial version. Upolad speed, RPM, fuel level and coolant temperture
-* 
-* 10 K potentialmeter:
-* ends to +5V and ground
-
-*/
-
-////////////////////////////////////////////////////////
-//
-// WiFi related //
-///////////////////////////////////////////////////////
 // ket noi board voi wifi
 #include <SPI.h>
 #include <WiFi101.h>
@@ -36,20 +10,34 @@ unsigned long lastConnectionTime = 0; // track the last connection time, theo d�
 const unsigned long postingInterval = 10L * 1000L; // post data every 10 seconds, up data mỗi 10 s
 WiFiClient client; //Initialize the wifi client
 int status = WL_IDLE_STATUS;     // the Wifi radio's status //Giai đoạn WiFi đang trong quá trình thay đổi giữa các trạng thái
-// Khởi tạo các biến lưu giá trị tín 
-int vSpeed = 5;
-int vRPM = 5;
-int vFuel = 5;
-int vCool_Temp = 5;
-int vOil_Temp = 5;
-int vVoltage = 5;
-
-void setup() {
-  
-  // Serial 
- Serial.begin(115200);
-
-  // Kiểm tra trạng thái kết nối cho đến khi có báo cáo WL_CONNECTED
+char rxData[40];
+char rxIndex = 0;
+int rpmstored = 0;
+int i=0,j=0;
+char text[20];
+// Khởi tạo các biến lưu trữ giá trị tín hiệu 
+int vSpeed = 0;
+int vRPM = 0;
+int vFuel = 0;
+int vCool_Temp = 0;
+int vOil_Temp = 0;
+int vVoltage = 0;
+void setup(){
+      Serial.begin(9600); // prints to serial monitor
+      Serial1.begin(9600); //Hardware serial connection to the obdii uart
+      //Serial1.flush();
+      //Reset the OBD-II-UART
+      Serial1.print("ATZ\r");
+      //Wait for a bit before starting to send commands after the reset.
+      delay(2000);
+      
+      OBD_read();
+      Serial.println(rxData);
+      clearBuffer();
+      
+      
+      delay(3000);
+      // Kiểm tra trạng thái kết nối cho đến khi có báo cáo WL_CONNECTED
    // check the presence of the shield:
   if (WiFi.status() == WL_NO_SHIELD) {
     Serial.println("WiFi not ready");
@@ -139,7 +127,181 @@ void printCurrentNet() {
   Serial.println(encryption, HEX);
   Serial.println();
 }
-void loop() {
+   
+  
+    
+    
+    void getRPM(void)
+    {
+      //Query the OBD-II-UART for the Vehicle rpm
+      Serial1.flush();
+      Serial1.print("010C\r");
+      clearBuffer();
+      Serial1.flush();
+      OBD_read();
+      //Serial.println("-");
+      Serial.print("toc do dong co la(hex): ");
+      xuly();
+      Serial.println(text);
+      Serial.print("toc do dong co la: ");
+      vRPM = ((strtol(&text[6], 0, 16) * 256) + strtol(&text[9], 0, 16)) / 4;
+    Serial.println(vRPM) ;     
+      //Serial.println(((strtol(&text[6], 0, 16) * 256) + strtol(&text[9], 0, 16)) / 4);
+      clearBuffer();
+      delay(500);
+    }
+
+    int getSPEED(void)
+    {
+
+      Serial1.flush();
+      Serial1.print("010D\r");
+      clearBuffer();
+      Serial1.flush();
+      OBD_read();
+      //Serial.println("-");
+      Serial.print("toc do xe la(hex): ");
+      xuly();
+      Serial.println(text);
+      Serial.print("toc do xe la: ");
+      vSpeed = strtol(&text[6], 0, 16);
+      Serial.println(vSpeed);
+      //Serial.println(strtol(&text[6], 0, 16));
+      clearBuffer();
+      delay(500);
+      //Query the OBD-II-UART for the vehicle speed
+      
+    }
+
+    int getOILTEMP(void)
+    {
+      Serial1.flush();
+      Serial1.print("015C\r");
+      clearBuffer();
+      Serial1.flush();
+      OBD_read();
+      //Serial.println("-");
+      Serial.print("nhiet do dau la(hex): ");
+      xuly();
+      Serial.println(text);
+      Serial.print("nhiet do dau la: ");
+      vOil_Temp = strtol(&text[6], 0, 16);
+      Serial.println(vOil_Temp);
+     // Serial.println(strtol(&text[6], 0, 16));
+      clearBuffer();
+      delay(500);
+      //Query the OBD-II-UART for the vehicle speed
+     
+      
+    }
+
+    int getFUEL(void)
+    {
+      Serial1.flush();
+      Serial1.print("012F\r");
+      clearBuffer();
+      Serial1.flush();
+      OBD_read();
+      //Serial.println("-");
+      Serial.print("luong nhien lieu la(hex): ");
+      xuly();
+      Serial.println(text);
+      Serial.print("luong nhien lieu la: ");
+      vFuel = strtol(&text[6], 0, 16);
+      Serial.println( vFuel);
+      //Serial.println(strtol(&text[6], 0, 16));
+      clearBuffer();
+      delay(500);
+      //Query the OBD-II-UART for the vehicle speed
+      
+    }
+
+    int getVOLT(void)
+    {
+      Serial1.flush();
+      Serial1.print("0142\r");
+      clearBuffer();
+      Serial1.flush();
+      OBD_read();
+      //Serial.println("-");
+      Serial.print("VON(hex): ");
+      xuly();
+      Serial.println(text);
+      Serial.print("VON: ");
+      vVoltage = (strtol(&text[6], 0, 16)*256+strtol(&text[9], 0, 16))/1000;
+      Serial.println(vVoltage);      
+      //Serial.println((strtol(&text[6], 0, 16)*256+strtol(&text[9], 0, 16))/1000);
+      clearBuffer();
+      delay(500);
+      //Query the OBD-II-UART for the vehicle speed
+      
+    }
+
+    int getWATERTEMP(void)
+    {
+      Serial1.flush();
+      Serial1.print("0105\r");
+      clearBuffer();
+      Serial1.flush();
+      OBD_read();
+      //Serial.println("-");
+      Serial.print("nhiet do nuoc(hex): ");
+      xuly();
+      Serial.println(text);
+      Serial.print("nhiet do nuoc: ");
+      vCool_Temp = strtol(&text[6], 0, 16) - 40;
+      Serial.println (vCool_Temp);  
+      //Serial.println(strtol(&text[6], 0, 16) - 40);
+      clearBuffer();
+      delay(500);
+      //Query the OBD-II-UART for the Engine Coolant Temp
+      Serial1.flush();
+      Serial1.print("0105\r");
+      OBD_read();
+
+      return strtol(&rxData[6], 0, 16) - 40;
+    }
+    
+    
+    void OBD_read(void)
+    {
+      char c;
+      while (c != '>'){
+        if (Serial1.available() > 0)
+        {
+          c = Serial1.read();
+          if ((c != '>') && (c != '\r') && (c != '\n')) //Keep these out of our buffer
+          {
+            rxData[rxIndex++] = c; //Add whatever we receive to the buffer
+          }
+        }
+      }  //The ELM327 ends its response with this char so when we get it we exit out.
+      rxData[rxIndex++] = '\0';//Converts the array into a string
+      rxIndex = 0; //Set this to 0 so next time we call the read we get a "clean buffer"
+    
+    }
+void clearBuffer(){
+  
+  int i;
+  for(int i = 0; i < 40; i++){
+  rxData[i] = '';
+  }
+  }
+void xuly(void){
+  for(int i = 0; i < 20; i++){
+  text[i] = '';
+  }
+  int len = strlen(rxData);
+  i=(len/2+2);
+  for(int i;i<len;i++){
+    text[j] = rxData[i];
+    j++;
+    }
+    text[j++] = '\0';
+    j=0;
+  
+  }
+  void loop() {
   while ( status != WL_CONNECTED) {
     /*lcd.clear();
     lcd.setCursor(0,0);*/
@@ -155,14 +317,41 @@ void loop() {
   getRPM();
   getFuel();
   getCoolTemp();*/
+  getRPM();
+  getSPEED();
+  getOILTEMP();
+  getFUEL();
+  getVOLT();
+  getWATERTEMP();
+//Serial1.flush();
+//      Serial1.print("015C\r");
+//      OBD_read();
+      //Serial.print("nhiet do dau la: ");
+//      Serial.println(rxData);
+//Serial.print (",");
+//Serial.print("W:");
+//Serial.print (getWATERTEMP());
+//Serial.print (",");
+//Serial.print("O:");
+//Serial.print (getOILTEMP());
+//Serial.print (",");
+//Serial.print("F:");
+//Serial.print (getFUEL());
+//Serial.print (",");
+//Serial.print("V:");
+//Serial.println (getVOLT());
+delay(500);
+Serial.flush();
+    
   
   if (millis() - lastConnectionTime > postingInterval) {
       httpRequest(vSpeed, vRPM,  vFuel, vCool_Temp, vOil_Temp, vVoltage);// gửi yêu cầu 
       lastConnectionTime = millis();
    }
-    // Kiểm tra kết nối network mỗi 10s
+    // Kiểm tra kết nối network mỗi 5s
   
   printCurrentNet();//Hàm kiểm tra kiểm tra kết nối network
+  delay(5000);
 }
 void httpRequest(int vSpeed, int vRPM, int vFuel,  int vCool_Temp, int vOil_Temp, int vVoltage ) {
   client.stop(); // đóng kế nối 
