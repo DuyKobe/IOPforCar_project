@@ -1,0 +1,46 @@
+
+
+Xác định tính hiệu OBD II trên misubishi xpander 2019 và ứng dụng IOT hiển thị giao diện
+
+Chương 1: Giới thiệu
+	1.1 Mở đầu 								Duy
+	1.2 GIới thiệu đề tài 							Khải
+	1.3 Mục tiêu đề tài 							Duy
+	1.4 Giới hạn đề tài							Khải
+Chương 2: Cơ sở lý thuyết
+	2.1 Hệ thống tín hiệu trên ô tô 					Khải
+	2.2 Các ứng dụng hỗ trợ lưu trữ và xây dụng giao diện hiện nay 		Duy (bỏ)
+	2.3 Trình bài các phương án 
+		2.3.1 Khối nhận tín hiệu (các cảm biến) 			Duy
+			+ cảm biến tốc độ trục khuỷu 
+			+ cảm biến tốc độ bánh xe
+			+ cảm biến ắc qui
+			+ cảm biến nhiệt độ dầu
+			+ cảm vị trí bướm ga
+		2.3.2 Khối xử lý tính hiệu					Khải		
+			2.3.1.2 Mạch chuyển đổi tính hiệu canbus (uart park)
+			2.3.2.1 Mạch vi điều khiển (mkr 1000)
+		2.3.3 Khối xuất kết quả						Duy
+	2.4 Chọn phương án
+		2.4.1 Bộ đọc tính hiệu từ ô tô					Khải
+			2.4.1.1 Khối nhận tín hiệu ( uart part)	...
+			2.4.1.2 Khối xử lý tín hiệu (mkr 1000)	...
+		2.4.2 Bộ xuất kết quả						Duy
+	2.5 Bộ phận đọc tính hiệu						Khải
+		2.5.1 Một số tiêu chuẩn sử dụng cho OBD II
+		2.5.2 Giao thức tín hiệu OBD II
+		2.5.3 CAN BUS
+		2.5.4 Chuẩn giao tiếp module, vi điều khiển
+		2.5.5 Nguyên lý hoạt động truyền tín hiệu trên xe Xpander
+	
+chương 3: Thiết kế bố trí chung 						Duy
+chương 4: Thiết kế kỹ thuật
+	4.1 Thiết kết phần cứng							Duy
+	4.2 Thiết phần mền (CODE)						Khải
+		4.2.3.1 Lưu đồ giải thuật OBD II Message
+		4.2.3.2 Lưu đồ thuật toán
+		4.2.3.3 Chương trình arduino
+	4.3 Thiết kế giao diện							Duy
+Chương 5: Kết Quả, So sánh và mô hình
+	----------------------------------------------------------------------------
+	

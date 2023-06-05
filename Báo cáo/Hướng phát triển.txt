@@ -1,0 +1,3 @@
+HƯỚNG PHÁT TRIỂN ĐÊ TÀI XÁC ĐỊNH TÍN HIỆU OBD II TRÊN CHIẾC MITSUBISHI XPANDER 2019 VÀ ỨNG DỤNG IOT VÀO HIỂN THỊ GIAO DIỆN
+* Hướng 1: Đọc và xử lý tín hiệu OBD-II đồng thời -> dùng pointer
+* Hướng 2: Xử lý tín hiệu bằng STM32F407Discovery -> Giao tiếp STM32F407Discovery Matlab -> tạo giao diện Matlab GUI & APP 
